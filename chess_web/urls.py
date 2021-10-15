@@ -19,5 +19,7 @@ from main import views as main_views
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('', main_views.chess_view)
+    path('', main_views.chess_view),
+    path('temp', main_views.temp)
+
 ]

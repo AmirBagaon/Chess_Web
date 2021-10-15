@@ -34,6 +34,9 @@
     <div>
       <h2 class="text-center" id="game_result">Running</h2>
     </div>
+    <div>
+        <form  id="friend_form" action="" method="post">{% csrf_token %} </form>
+    </div>
   </body>
 </html>
 
@@ -50,6 +53,10 @@
 var board = null
 var game = new Chess()
 console.log("{% static 'main/css/chessboard-1.0.0.min.css' %}")
+
+function sendForm() {
+    $('#friend_form').submit();
+}
 
 function makeRandomMove () {
   var possibleMoves = game.moves()
@@ -76,10 +83,67 @@ function makeRandomMove () {
 
   console.log(game.pgn())
   console.log(game.fen())
-  window.setTimeout(makeRandomMove, 1)
+//   window.setTimeout(makeRandomMove, 100)
+    window.setTimeout(makeMove, 500)
+
+}
+function makeMove() {
+    sendForm()
+    if (game.game_over()) {
+    console.log("Here")
+    game_result_div = document.getElementById("game_result")
+    console.log("Here2")
+    if (game.in_checkmate()) {
+      game_result_div.innerHTML = "Checkmate"
+    }
+    else {
+      game_result_div.innerHTML = "Draw"
+    }
+
+    
+    return
+  }
+//   window.setTimeout(makeMove, 500)
 }
 
 board = Chessboard('chess_board', 'start')
 
-window.setTimeout(makeRandomMove, 500)
+window.setTimeout(makeMove, 500)
+</script>
+
+<script>
+    
+$(document).ready(function() {
+
+//Function to send POST with any desired data
+$('#friend_form').submit(function() { // On form submit event
+
+    console.log("before sending")
+    var fen = game.fen()
+    console.log(fen)
+    //The form contains the csrf token
+    var data = $(this).serializeArray(); // convert form to array
+    data.push({name: "input_area", value:  fen});
+
+    $.ajax({ // create an AJAX call...
+        data: $.param(data), // get the form data
+        type: $(this).attr('method'), // GET or POST
+        url: "/temp", // the file to call
+        success: function(response) { // on success..
+            console.log("after sending")
+            console.log(response.message)
+            game.move(response.message, { sloppy: true })
+            board.position(game.fen())
+            console.log(game.fen())
+            console.log("success")
+            // $('#output_area').val(response.message); // update the DIV
+        },
+        error: function(e, x, r) { // on error..
+            console.log("error")
+            // $('#output_area').html(e); // update the DIV
+        }
+    });
+    return false;
+});
+});
 </script>
