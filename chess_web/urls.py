@@ -19,7 +19,11 @@ from main import views as main_views
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('', main_views.chess_view),
-    path('temp', main_views.temp)
+    path('', main_views.welcome),
+    path('temp', main_views.temp),
+    path('welcome', main_views.welcome),
+    path('onevsone', main_views.onevsone),
+    path('randomPlay', main_views.randomPlay),
+    path('vsAI', main_views.vsAI),
 
 ]
