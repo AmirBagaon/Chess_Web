@@ -36,11 +36,22 @@ def vsAI(request):
 def temp(request):
     print("$$$$$$$$$$$$$$ HERE")
     returnValue = ""
+    data = ""
     if request.method == "POST":
         print(request.POST)
         data = request.POST["input_area"]
 
-        handler = DataHanlder(data)
-        returnValue = handler.handle()
         
-    return HttpResponse(json.dumps({'message': returnValue}), content_type="application/json")
+    if request.method == "GET":
+        print("$$$$$$$$$$$$$$ In GET")
+        data = request.GET.get('f', '')
+        print(data)
+
+    handler = DataHanlder(data)
+    returnDictValues = handler.handle()
+        
+    return HttpResponse(json.dumps(returnDictValues), content_type="application/json")
+
+    # returnValue = handler.handle()
+        
+    # return HttpResponse(json.dumps({'message': returnValue}), content_type="application/json")

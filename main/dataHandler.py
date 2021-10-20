@@ -11,9 +11,35 @@ class DataHanlder():
         return self.get_best_move()
 
     def get_best_move(self):
-        self.stockfish.set_fen_position(self._data)
+        position = str(self._data).strip()
+        if " " in position:
+          self.stockfish.set_fen_position(position)
+          returnValue = self.stockfish.get_best_move()
+          return {'message': returnValue}
+        else:
+          white_turn = position + " w KQkq - 0 1"
+          self.stockfish.set_fen_position(white_turn)
+          white_best_move = self.stockfish.get_best_move()
+          black_turn = position + " b KQkq - 0 1"
+          self.stockfish.set_fen_position(black_turn)
+          black_best_move = self.stockfish.get_best_move()
+
+          #Now if the board is from black perspective, it will predict it in the opposite way,
+          #So need to reverse it
+          position = position[::-1]
+          r_white_turn = position + " w KQkq - 0 1"
+          self.stockfish.set_fen_position(r_white_turn)
+          r_white_best_move = self.stockfish.get_best_move()
+          r_black_turn = position + " b KQkq - 0 1"
+          self.stockfish.set_fen_position(r_black_turn)
+          r_black_best_move = self.stockfish.get_best_move()
+          return {'white': white_best_move, 'black': black_best_move,
+          'reverse_white' : r_white_best_move, 'reverse_black' : r_black_best_move,
+          'message': ""}
+          
+
         # return self.stockfish.get_best_move_time(2000)
-        return self.stockfish.get_best_move()
+        # return self.stockfish.get_best_move()
 
     @staticmethod
     def getOneVsOne():
@@ -113,7 +139,7 @@ var config = {
   game.move(possibleMoves[randomIdx])
   board.position(game.fen())
 
-  window.setTimeout(makeRandomMove, 500)
+  window.setTimeout(makeRandomMove, 5)
 }
 window.setTimeout(makeRandomMove, 500)
 var config = {
@@ -125,15 +151,10 @@ var config = {
         return """
 function makeMove() {
     sendForm()
-    console.log(game.turn())
+    console.log("$$$$$$$$$$$$")
+    updateStatus()
+        console.log("$$$$$$$$$$$$")
     if (game.game_over()) {
-    game_result_div = document.getElementById("game_result")
-    if (game.in_checkmate()) {
-      game_result_div.innerHTML = "Checkmate"
-    }
-    else {
-      game_result_div.innerHTML = "Draw"
-    }
     return
   }
 
@@ -158,7 +179,9 @@ function onDrop (source, target) {
 
   // illegal move
   if (move === null) return 'snapback'
-
+    console.log("!!!!!!!!")
+  updateStatus()
+      console.log("!!!!!!!!")
   // make random legal move for black
   window.setTimeout(makeMove, 250)
 }
