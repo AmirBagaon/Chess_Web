@@ -17,28 +17,32 @@
     <!-- chessboardjs -->
     <link rel="stylesheet" href="{% static 'main/css/chessboard-1.0.0.min.css' %}">
     <script src="{% static 'main/js/chessboard-1.0.0.min.js' %}"></script>
+    <!-- Core theme CSS (includes Bootstrap)-->
+    <link href="{% static 'main/css/styles.css' %}" rel="stylesheet" />
   </head>
   <body>
-    <div class="container">
-      <div class="row">
-        <div class="col">
-          <div class="card mt-5">
-            <div class="card-body">
-              <!-- chess board view -->
-              <div id="chess_board" class="mx-auto" style="width: 600px"></div>
+    <header class="masthead2">
+        <div class="container px-4 px-lg-5 h-100">
+            <div class="row gx-4 gx-lg-5 h-100 align-items-center justify-content-center text-center">
+               
+                <!-- Core theme CSS (includes Bootstrap)-->
+                <div id="chess_board" class="mx-auto" style="width: 800px"></div>
+                <div class="col-lg-8 align-self-baseline">
+                        <h2 class="text-center" style="color:white;"><label>Status:</label>
+                        <div id="status"></div></h2>
+                        <div>
+                            <button onclick="flipboard()">Flip Board</button>
+                        </div>
+                </div>
+                <div class="container px-4 px-lg-5"><div class="small text-center text-muted">
+                    <!-- Image by <a href="https://pixabay.com/users/devanath-1785462/?utm_source=link-attribution&amp;utm_medium=referral&amp;utm_campaign=image&amp;utm_content=1215079">Devanath</a> from <a href="https://pixabay.com/?utm_source=link-attribution&amp;utm_medium=referral&amp;utm_campaign=image&amp;utm_content=1215079">Pixabay</a> -->
+                </div>
             </div>
-          </div>
+            </div>
         </div>
-      </div>
-    </div>
-    <div>
-      <h2 class="text-center" id="game_result">Running</h2>
-    </div>
+    </header>
     <div>
         <form  id="friend_form" action="" method="post">{% csrf_token %} </form>
-    </div>
-    <div>
-        <button onclick="flipboard()">Flip Board</button>
     </div>
   </body>
 </html>
@@ -61,13 +65,46 @@ function flipboard(){
     board.flip()
 }
 
+function updateStatus () {
+  var status = ''
+
+  var moveColor = 'White'
+  if (game.turn() === 'b') {
+    moveColor = 'Black'
+  }
+  console.log("HERE! " + moveColor)
+  // checkmate?
+  if (game.in_checkmate()) {
+    status = 'Game over, ' + moveColor + ' is in checkmate.'
+  }
+
+  // draw?
+  else if (game.in_draw()) {
+    status = 'Game over, drawn position'
+  }
+
+  // game still on
+  else {
+    status = moveColor + ' to move'
+
+    // check?
+    if (game.in_check()) {
+      status += ', ' + moveColor + ' is in check'
+    }
+  }
+
+  $status.html(status)
+}
+
 {% autoescape off %}
 {{data}}
 {% endautoescape %}
 
+var $status = $('#status')
 var board = null
 var game = new Chess()
 board = Chessboard('chess_board', config)
+updateStatus()
 </script>
 
 <script>
@@ -93,6 +130,7 @@ $('#friend_form').submit(function() { // On form submit event
             console.log(response.message)
             game.move(response.message, { sloppy: true })
             board.position(game.fen())
+            updateStatus()
             console.log(game.fen())
             console.log("success")
             // $('#output_area').val(response.message); // update the DIV
